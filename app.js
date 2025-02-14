@@ -6,7 +6,7 @@ import connectDB from './config/db.js';
 import errorHandler from './middlewares/errorHandler.js';
 import morganMiddleware from './middlewares/accessHandler.js';
 import securityMiddleware from './middlewares/securityMiddleware.js';
-
+import deviceCheck from './middlewares/deviceCheck.js';
 dotenv.config();
 await connectDB();
 
@@ -17,6 +17,7 @@ securityMiddleware(app);
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser(process.env.COOKIE_SECRET));
+app.use(deviceCheck);
 
 app.get('/', ( req , res , next ) => {
     try {
