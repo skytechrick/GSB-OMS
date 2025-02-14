@@ -14,6 +14,18 @@ await connectDB();
 const app = express();
 
 app.use(morganMiddleware);
+app.use(cors({
+    origin: [
+        "http://localhost",
+    ],
+    credentials: true,
+    optionsSuccessStatus: 200,
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    exposedHeaders: ['Content-Length', 'X-Knowledge-Base'],
+    preflightContinue: false,
+    optionsSuccessStatus: 204,
+}));
 
 
 app.get('/', ( req , res , next ) => {
