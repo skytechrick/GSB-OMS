@@ -7,6 +7,7 @@ import helmet from 'helmet';
 import connectDB from './config/db.js';
 import errorHandler from './middlewares/errorHandler.js';
 import morganMiddleware from './middlewares/accessHandler.js';
+import securityMiddleware from './middlewares/securityMiddleware.js';
 
 dotenv.config();
 await connectDB();
@@ -14,40 +15,7 @@ await connectDB();
 const app = express();
 
 app.use(morganMiddleware);
-app.use(cors({
-    origin: [
-        "http://localhost",
-    ],
-    credentials: true,
-    optionsSuccessStatus: 200,
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-    allowedHeaders: ['Content-Type', 'Authorization'],
-    exposedHeaders: ['Content-Length', 'X-Knowledge-Base'],
-    preflightContinue: false,
-    optionsSuccessStatus: 204,
-}));
-
-app.use(helmet({
-    contentSecurityPolicy: {
-        directives: {
-            defaultSrc: ["'self'"],
-            scriptSrc: ["'self'", "'unsafe-inline'"],
-            styleSrc: ["'self'", "'unsafe-inline'"], 
-            scriptSrcAttr: ["'self'", "'unsafe-inline'"],
-            imgSrc: ["'self'", "data:"],
-        }
-    },
-    frameguard: { action: "deny" },
-    hsts: process.env.NODE_ENV === "production" ? { 
-        maxAge: 31536000, 
-        includeSubDomains: true, 
-        preload: true 
-    } : false,
-    xssFilter: true,
-    noSniff: true,
-    hidePoweredBy: true,
-    referrerPolicy: { policy: "no-referrer" }
-}));
+securityMiddleware(app);
 
 app.get('/', ( req , res , next ) => {
     try {
