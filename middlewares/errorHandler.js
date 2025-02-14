@@ -1,37 +1,20 @@
-import fs from 'fs/promises';
-import path from 'path';
+import fs from "fs/promises";
+import path from "path";
 
-const errorMiddleware = async ( error , req , res , next ) => {
+const errorMiddleware = async (error, req, res, next) => {
+    const filePath = path.join(process.cwd(), "logs", "internalServerError.log");
+
     try {
-        const folderPath = path.join(process.cwd(), './logs');
-        const filePath = path.join(folderPath, 'internalServerError.log');
-        
-        try {
-            await fs.access(folderPath);
-        } catch {
-            await fs.mkdir(folderPath, { recursive: true });
-        };
-        
-        try {
-            await fs.access(filePath);
-        } catch {
-            await fs.writeFile(filePath, '', 'utf8');
-        };
+        await fs.mkdir(path.dirname(filePath), { recursive: true });
+        await fs.appendFile(filePath, `Error: ${new Date().toLocaleString()}\n${error.stack || error.message || "No stack trace"}\n\n`);
 
-        const errorLog = `Error: Something went wrong. Time: ${new Date().toLocaleTimeString()} - ${new Date().toDateString()}\n` + `${error.stack || error.message || 'No stack trace available'}\n\n`;
-        await fs.appendFile(filePath, errorLog, 'utf8');
-
-        return res.status(500).send({
-            status: 'error',
-            message: process.env.NODE_ENV === 'production' ? 'Something went wrong, internal server error' : error.message,
+        res.status(500).send({
+            status: "error",
+            message: process.env.NODE_ENV === "production" ? "Something went wrong, internal server error" : error.message,
         });
-        
-    } catch (logError) {
-        return res.status(500).send({
-            status: 'error',
-            message: process.env.NODE_ENV === 'production' ? 'Something went wrong, internal server error' : error.message,
-        });
-    };
+    } catch {
+        res.status(500).send({ status: "error", message: "Internal server error" });
+    }
 };
 
 export default errorMiddleware;
