@@ -2,8 +2,6 @@ import dotenv from 'dotenv';
 import express from 'express';
 import bodyParser from 'body-parser';
 import cookieParser from 'cookie-parser';
-import cors from 'cors';
-import helmet from 'helmet';
 import connectDB from './config/db.js';
 import errorHandler from './middlewares/errorHandler.js';
 import morganMiddleware from './middlewares/accessHandler.js';
@@ -16,6 +14,9 @@ const app = express();
 
 app.use(morganMiddleware);
 securityMiddleware(app);
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(cookieParser(process.env.COOKIE_SECRET));
 
 app.get('/', ( req , res , next ) => {
     try {
