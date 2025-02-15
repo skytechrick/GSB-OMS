@@ -1,7 +1,7 @@
 
 export default async ( req , res , next ) => {
     try {
-        const userAgent = req.headers["user-agent"];
+        const userAgent = req.headers["user-agent"] || "";
         
         const blockedUserAgents = [
             // "PostmanRuntime",
@@ -33,10 +33,11 @@ export default async ( req , res , next ) => {
         };
         
         req.isWeb = false;
-        const isWeb = /\b(Mozilla|Chrome|Safari|Edge|Firefox|Opera)\b/.test(userAgent);
+        // const isWeb = /\b(Mozilla|Chrome|Safari|Edge|Firefox|Opera)\b/.test(userAgent);
         
-        if(clientApp === "gsb-web" && isWeb) {
-            req.isWeb = isWeb;
+        if(clientApp === "gsb-web") {
+        // if(clientApp === "gsb-web" && isWeb) {
+            req.isWeb = true;
         };
 
         next();

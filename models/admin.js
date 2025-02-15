@@ -1,3 +1,4 @@
+import { profile } from "console";
 import mongoose from "mongoose";
 
 const adminSchema = new mongoose.Schema({
@@ -6,6 +7,12 @@ const adminSchema = new mongoose.Schema({
         required: true,
         unique: true,
         max: 255,
+        min: 6,
+        lowercase: true,
+    },
+    profilePicture: {
+        type: String,
+        default: null,
     },
     personalDetails:{
         firstName: {
