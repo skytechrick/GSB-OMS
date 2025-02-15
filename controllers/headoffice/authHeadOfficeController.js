@@ -3,7 +3,7 @@ import admin from '../../models/admin.js';
 import { loginSchema } from '../../utils/zodSchema.js';
 import { hashPassword , comparePassword } from '../../utils/passwordHandler.js';
 import { sendMail } from '../../utils/sendMail.js';
-import { generateToken } from '../../utils/jwtHandler.js';
+import { generateToken , verifyToken } from '../../utils/jwtHandler.js';
 
 export const login = async ( req , res , next ) => {
     try {
@@ -68,6 +68,8 @@ export const login = async ( req , res , next ) => {
             };
             const isCorrect = await comparePassword(password , adminData.password);
             if (!isCorrect) {
+                adminData.loggedIn.loginAttempts++;
+                await adminData.save();
                 return res.status(400).json({
                     status: 'failed',
                     message: "Incorrect password."
@@ -127,10 +129,126 @@ export const login = async ( req , res , next ) => {
 
 export const loginVerifyOtp = async ( req , res , next ) => {
     try {
+        
+        const isWeb = req.isWeb;
+        
+        if (isWeb) {
+
+            if (!req.signedCookies.adminOtp) {
+                return res.status(401).send({
+                    status: 'error',
+                    message: 'Unauthorized access',
+                });
+            };
+            req.token = req.signedCookies.adminOtp;
+
+        }else{
+            if (!req.headers.authorization) {
+                console.log("A");
+                return res.status(401).send({
+                    status: 'error',
+                    message: 'Unauthorized access',
+                });
+            };
+
+            const token = req.headers.authorization.split(' ')[1];
+
+            req.token = token;
+        };
+
+        const decoded = verifyToken(req.token);
+        if (!decoded) {
+            if(isWeb){
+                return res.status(401).clearCookie("adminOtp").send({
+                    status: 'error',
+                    message: 'Unauthorized access',
+                });
+            }
+            return res.status(401).json({
+                status: 'error',
+                message: 'Unauthorized access',
+            });
+        };
+
+        const otp = req.body.otp;
+        if(!otp){
+            return res.status(400).json({
+                status: 'error',
+                message: 'Invalid OTP',
+            });
+        };
+
+        if(otp.length !== 6){
+            return res.status(400).json({
+                status: 'error',
+                message: 'Invalid OTP',
+            });
+        };
+
+        const adminData = await admin.findById(decoded.id);
+
+        if (!adminData) {
+            return res.status(401).json({
+                status: 'error',
+                message: 'Unauthorized access',
+            });
+        };
+
+        if(adminData.authentication.token !== decoded.token){
+            return res.status(401).json({
+                status: 'error',
+                message: 'Unauthorized access',
+            });
+        };
+
+        if (adminData.authentication.otp !== parseInt(otp, 10)) {
+            return res.status(400).json({
+                status: 'error',
+                message: 'Invalid OTP',
+            });
+        };
+
+        if (adminData.authentication.otpExpiry < Date.now()) {
+            return res.status(400).json({
+                status: 'error',
+                message: 'OTP expired',
+            });
+        };
+
+        const newToken = crypto.randomBytes(57).toString("hex");
+        adminData.authentication.otp = null;
+        adminData.authentication.otpExpiry = null;
+        adminData.authentication.token = null;
+        adminData.loggedIn.token = newToken;
+        adminData.loggedIn.lastLoggedIn = Date.now();
+        adminData.loggedIn.loginAttempts = 0;
+
+        await adminData.save();
+
+        const jwtNewToken = generateToken({
+            id: adminData._id,
+            token: newToken,
+            createdAt: Date.now(),
+        });
+
+        if(isWeb){
+            return res.status(200).clearCookie("adminOtp").cookie("admin" , jwtNewToken , {
+                path: "/",
+                httpOnly: true,
+                sameSite: "strict",
+                secure: process.env.NODE_ENV === 'production',
+                maxAge: 1000 * 60 * 60 * 24 * 30,
+                signed: true,
+            }).json({
+                status: 'success',
+                message: 'Login successfully',
+            });
+        };
 
         return res.status(200).json({
             status: 'success',
             message: 'Login successfully',
+            token: "Bearer "+jwtNewToken,
         });
 
     } catch (error) {
