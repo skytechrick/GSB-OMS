@@ -1,4 +1,4 @@
-import transporter from "../config/noReplyMail"
+import transporter from "../config/noReplyMail.js"
 export const sendMail = async (mailOptions) => {
     try{
         let info = await transporter.sendMail(mailOptions);
