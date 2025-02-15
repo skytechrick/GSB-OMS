@@ -7,6 +7,7 @@ import errorHandler from './middlewares/errorHandler.js';
 import morganMiddleware from './middlewares/accessHandler.js';
 import securityMiddleware from './middlewares/securityMiddleware.js';
 import deviceCheck from './middlewares/deviceCheck.js';
+
 dotenv.config();
 await connectDB();
 
