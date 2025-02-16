@@ -42,29 +42,29 @@ export const verifyHeadquater = async ( req , res , next ) => {
 
         const adminToken = decoded.token;
         const adminId = decoded.id;
-        const regionalOfficerData = await admin.findById(adminId);
-        if(!regionalOfficerData){
+        const adminData = await admin.findById(adminId);
+        if(!adminData){
             return res.status(401).json({
                 status: "error",
                 message: "Unauthorized access"
             });
         };
-        if(regionalOfficerData.ban){
+        if(adminData.ban){
             if(isWeb){
                 return res.status(401).clearCookie("admin").json({
                     status: "error",
                     message: "You are banned",
-                    reason: regionalOfficerData.banReason
+                    reason: adminData.banReason
                 });
             }
             return res.status(401).json({
                 status: "error",
                 message: "You are banned",
-                reason: regionalOfficerData.banReason
+                reason: adminData.banReason
             });
         };
 
-        if(regionalOfficerData.isVerified === false){
+        if(adminData.isVerified === false){
             if(isWeb){
                 return res.status(401).clearCookie("admin").json({
                     status: "error",
@@ -77,7 +77,7 @@ export const verifyHeadquater = async ( req , res , next ) => {
             });
         };
 
-        if(regionalOfficerData.loggedIn.token !== adminToken){
+        if(adminData.loggedIn.token !== adminToken){
             if(isWeb){
                 return res.status(401).clearCookie("admin").json({
                     status: "error",
@@ -90,7 +90,7 @@ export const verifyHeadquater = async ( req , res , next ) => {
             });
         };
 
-        req.regionalOfficerData = regionalOfficerData;
+        req.adminData = adminData;
         
         next();
 
