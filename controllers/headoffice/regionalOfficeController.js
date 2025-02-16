@@ -72,6 +72,7 @@ export const getAllRegionalOffices = async ( req , res , next ) => {
         return res.status(200).json({
             status: "success",
             message: "All Regional Offices",
+            countDocuments: allRegionalOffices.length,
             data: allRegionalOffices,
             meta: {
                 totalCount,
