@@ -165,3 +165,37 @@ export const createRegionalOfficer = async ( req , res , next ) => {
         next(error);
     };
 };
+
+export const getAllRegionalOfficer = async ( req , res , next ) => {
+    try {
+        
+        const {
+            limit = 10,
+            page = 1,
+        } = req.query;
+
+        const allRegionalOfficers = await regionalOfficer.find({})
+        .select("-__v -address -loggedIn -authentication -password -accountHistory")
+        .limit(parseInt(limit, 10))
+        .skip(page > 0 ? ( ( page - 1 ) * limit ) : 0 );
+        
+        const totalCount = await regionalOfficer.find({}).countDocuments();
+
+        return res.status(200).json({
+            status: "success",
+            message: "All Regional Officers",
+            countDocuments: allRegionalOfficers.length,
+            data: allRegionalOfficers,
+            meta: {
+                totalCount,
+                limit: parseInt(limit, 10),
+                page: parseInt(page, 10),
+                availablePages: Math.ceil(totalCount / limit),
+                more: (totalCount - ( page * limit )) > 0 ? true : false,
+            }
+        });
+
+    } catch (error) {
+        next(error);
+    };
+};
