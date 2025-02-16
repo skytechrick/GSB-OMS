@@ -48,7 +48,7 @@ The **GSB OMS** is a centralized platform for managing different office levels, 
 ---
 
 ## 🌐 Website
-🔗 **[GET SKY BUY](https://getskybuy.in)** *(Update with your actual website)*
+🔗 **[GET SKY BUY](https://getskybuy.in)**
 
 ---
 
