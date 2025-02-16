@@ -1,5 +1,5 @@
 import crypto from 'crypto';
-import regionalOfficer from '../../models/regionalOfficer.js';
+import branchManager from '../../models/branchManager.js';
 import { loginSchema } from '../../utils/zodSchema.js';
 import { comparePassword } from '../../utils/passwordHandler.js';
 import { sendMail } from '../../utils/sendMail.js';
@@ -7,6 +7,7 @@ import { generateToken , verifyToken } from '../../utils/jwtHandler.js';
 
 export const login = async ( req , res , next ) => {
     try {
+        
         const validData = loginSchema.safeParse(req.body);
         if (!validData.success) {
             return res.status(400).json({
@@ -21,28 +22,28 @@ export const login = async ( req , res , next ) => {
         const otp = crypto.randomInt(100000, 999999);
         const otpExpiry = new Date(Date.now() + 300000);
 
-        let regionalOfficerData = await regionalOfficer.findOne({
+        let branchManagerData = await branchManager.findOne({
             email: email,
         });
 
-        if (!regionalOfficerData) {
+        if (!branchManagerData) {
             return res.status(400).json({
                 status: 'error',
                 message: "No account found with this email.",
             });
         };
 
-        if(regionalOfficerData.isBan){
+        if(branchManagerData.isBan){
             return res.status(400).json({
                 status: 'error',
                 message: "Your account has been banned.",
-                reason: regionalOfficerData.banReason,
+                reason: branchManagerData.banReason,
             });
         };
-        const isCorrect = await comparePassword(password , regionalOfficerData.password);
+        const isCorrect = await comparePassword(password , branchManagerData.password);
         if (!isCorrect) {
-            regionalOfficerData.loggedIn.loginAttempts++;
-            await regionalOfficerData.save();
+            branchManagerData.loggedIn.loginAttempts++;
+            await branchManagerData.save();
             return res.status(400).json({
                 status: 'failed',
                 message: "Incorrect password."
@@ -52,8 +53,8 @@ export const login = async ( req , res , next ) => {
         const isMailSent = await sendMail({
             from: `No-reply <${process.env.NO_REPLY_MAIL_ID}>`,
             to: email,
-            subject: "Reional officer Login | Notification",
-            html: `<h1>Regional officer login OTP: ${otp}</h1>${Date().toLocaleString("en-IN")}`,
+            subject: "Branch manager Login | Notification",
+            html: `<h1>Branch manager login OTP: ${otp}</h1>${Date().toLocaleString("en-IN")}`,
         });
 
         if(!isMailSent){
@@ -63,17 +64,17 @@ export const login = async ( req , res , next ) => {
             });
         };
 
-        regionalOfficerData.authentication = { otp , otpExpiry , token };
-        await regionalOfficerData.save();
+        branchManagerData.authentication = { otp , otpExpiry , token };
+        await branchManagerData.save();
 
         const jwtToken = generateToken({
-            id: regionalOfficerData._id,
+            id: branchManagerData._id,
             token,
             createdAt: Date.now(),
         });
 
         if(req.isWeb){
-            return res.status(201).cookie("regionalOfficerOtp" , jwtToken , {
+            return res.status(201).cookie("branchManagerOtp" , jwtToken , {
                 path: "/",
                 httpOnly: true,
                 sameSite: "strict",
@@ -91,11 +92,12 @@ export const login = async ( req , res , next ) => {
             message: "OTP sent to your email.",
             token: "Bearer "+jwtToken,
         });
-        
+
     } catch (error) {
         next(error);
     };
 };
+
 
 export const loginVerifyOtp = async ( req , res , next ) => {
     try {
@@ -104,13 +106,13 @@ export const loginVerifyOtp = async ( req , res , next ) => {
         
         if (isWeb) {
 
-            if (!req.signedCookies.regionalOfficerOtp) {
+            if (!req.signedCookies.branchManagerOtp) {
                 return res.status(401).send({
                     status: 'error',
                     message: 'Unauthorized access',
                 });
             };
-            req.token = req.signedCookies.regionalOfficerOtp;
+            req.token = req.signedCookies.branchManagerOtp;
 
         }else{
             if (!req.headers.authorization) {
@@ -128,7 +130,7 @@ export const loginVerifyOtp = async ( req , res , next ) => {
         const decoded = verifyToken(req.token);
         if (!decoded) {
             if(isWeb){
-                return res.status(401).clearCookie("regionalOfficerOtp").send({
+                return res.status(401).clearCookie("branchManagerOtp").send({
                     status: 'error',
                     message: 'Unauthorized access',
                 });
@@ -154,30 +156,30 @@ export const loginVerifyOtp = async ( req , res , next ) => {
             });
         };
 
-        const regionalOfficerData = await regionalOfficer.findById(decoded.id);
+        const branchManagerData = await branchManager.findById(decoded.id);
 
-        if (!regionalOfficerData) {
+        if (!branchManagerData) {
             return res.status(401).json({
                 status: 'error',
                 message: 'Unauthorized access',
             });
         };
 
-        if(regionalOfficerData.authentication.token !== decoded.token){
+        if(branchManagerData.authentication.token !== decoded.token){
             return res.status(401).json({
                 status: 'error',
                 message: 'Unauthorized access',
             });
         };
 
-        if (regionalOfficerData.authentication.otp !== parseInt(otp, 10)) {
+        if (branchManagerData.authentication.otp !== parseInt(otp, 10)) {
             return res.status(400).json({
                 status: 'error',
                 message: 'Invalid OTP',
             });
         };
 
-        if (regionalOfficerData.authentication.otpExpiry < Date.now()) {
+        if (branchManagerData.authentication.otpExpiry < Date.now()) {
             return res.status(400).json({
                 status: 'error',
                 message: 'OTP expired',
@@ -185,28 +187,28 @@ export const loginVerifyOtp = async ( req , res , next ) => {
         };
 
         const newToken = crypto.randomBytes(57).toString("hex");
-        regionalOfficerData.authentication = {
+        branchManagerData.authentication = {
             otp: null,
             otpExpiry: null,
             token: null,
         };
-        regionalOfficerData.loggedIn = {
+        branchManagerData.loggedIn = {
             token: newToken,
             lastLoggedIn: Date.now(),
             loginAttempts: 0,
         };
-        regionalOfficerData.isVerified = true;
+        branchManagerData.isVerified = true;
 
-        await regionalOfficerData.save();
+        await branchManagerData.save();
 
         const jwtNewToken = generateToken({
-            id: regionalOfficerData._id,
+            id: branchManagerData._id,
             token: newToken,
             createdAt: Date.now(),
         });
 
         if(isWeb){
-            return res.status(200).clearCookie("regionalOfficerOtp").cookie("regionalOfficer" , jwtNewToken , {
+            return res.status(200).clearCookie("branchManagerOtp").cookie("branchManager" , jwtNewToken , {
                 path: "/",
                 httpOnly: true,
                 sameSite: "strict",
