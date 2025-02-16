@@ -2,6 +2,12 @@ import express from 'express';
 const regionalOfficeRouter = express.Router();
 export default regionalOfficeRouter;
 
-import { home } from '../../controllers/headOffice/regionalOfficeController.js';
+import { dashboard , createRegionalOffice , getAllRegionalOffices } from '../../controllers/headOffice/regionalOfficeController.js';
 
-regionalOfficeRouter.post("/" , home);
+regionalOfficeRouter.post("/create" , createRegionalOffice);
+regionalOfficeRouter.post("/all" , getAllRegionalOffices);
+// regionalOfficeRouter.post("/dashboard" , dashboard);
+// regionalOfficeRouter.post("/dashboard" , dashboard);
+// regionalOfficeRouter.post("/dashboard" , dashboard);
+// regionalOfficeRouter.post("/dashboard" , dashboard);
+// regionalOfficeRouter.post("/dashboard" , dashboard);
