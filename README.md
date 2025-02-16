@@ -30,25 +30,25 @@ The **GSB OMS** is a centralized platform for managing different office levels, 
 
 ## 🔧 Tech Stack
 
-- **Frontend**: React.js / Next.js *(Planned)*
+- **Frontend**: React.js *(Planned)*
 - **Backend**: Node.js, Express.js
-- **Database**: MongoDB / MySQL
-- **Authentication**: JWT-based security
+- **Database**: MongoDB
+- **Authentication**: JWT-based security and OAuth
 - **Hosting**: cPanel / VPS
 
 ---
 
 ## 📦 Packages Used
 - **Express.js** – Backend framework
-- **Mongoose / MySQL** – Database management
+- **Mongoose** – Database management
 - **JWT** – Authentication & Authorization
-- **React / Next.js** – User Interface *(Upcoming)*
+- **React** – User Interface *(Upcoming)*
 - **Razorpay API** – Payment Processing *(Planned)*
 
 ---
 
 ## 🌐 Website
-🔗 **[GET SKY BUY](https://your-website.com)** *(Update with your actual website)*
+🔗 **[GET SKY BUY](https://getskybuy.in)** *(Update with your actual website)*
 
 ---
 
@@ -69,7 +69,7 @@ The **GSB OMS** is a centralized platform for managing different office levels, 
 Clone the repository:
 
 ```sh
-git clone https://github.com/skytechrick/officialsGetskybuyWorkspace.git
+git clone https://github.com/skytechrick/GSB-OMS.git
 cd GSB-OMS
 npm install
 npm start
