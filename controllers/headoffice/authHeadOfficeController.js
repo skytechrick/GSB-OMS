@@ -222,6 +222,7 @@ export const loginVerifyOtp = async ( req , res , next ) => {
         adminData.loggedIn.token = newToken;
         adminData.loggedIn.lastLoggedIn = Date.now();
         adminData.loggedIn.loginAttempts = 0;
+        adminData.isVerified = true;
 
         await adminData.save();
 

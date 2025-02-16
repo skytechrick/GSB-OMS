@@ -196,6 +196,7 @@ export const loginVerifyOtp = async ( req , res , next ) => {
             lastLoggedIn: Date.now(),
             loginAttempts: 0,
         };
+        regionalOfficerData.isVerified = true;
 
         await regionalOfficerData.save();
 
