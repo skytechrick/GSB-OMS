@@ -149,7 +149,16 @@ export const createRegionalOfficer = async ( req , res , next ) => {
         });
 
         const savedRegionalOfficer = (await newRegionalOfficer.save());
-        const responseData = savedRegionalOfficer.toObject(); // Convert to plain object
+
+        await regionalOffice.findByIdAndUpdate(validatedData.data.regionalOfficeId, 
+            {
+                $push: {
+                    regionalOfficers: savedRegionalOfficer._id,
+                }
+            },
+        );
+
+        const responseData = savedRegionalOfficer.toObject();
         delete responseData.password;
         delete responseData.loggedIn;
         delete responseData.authentication;
