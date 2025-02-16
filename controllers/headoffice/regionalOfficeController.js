@@ -1,7 +1,9 @@
 
 import regionalOffice from '../../models/regionalOffice.js';
-
-import { createRegionalOfficeSchema } from '../../utils/zodSchema.js';
+import regionalOfficer from '../../models/regionalOfficer.js';
+import { sendMail } from '../../utils/sendMail.js';
+import { createRegionalOfficeSchema , createRegionalOfficerSchema } from '../../utils/zodSchema.js';
+import { hashPassword } from '../../utils/passwordHandler.js';
 
 export const dashboard = async ( req , res , next ) => {
     try {
@@ -83,6 +85,82 @@ export const getAllRegionalOffices = async ( req , res , next ) => {
             }
         });
         
+    } catch (error) {
+        next(error);
+    };
+};
+
+export const createRegionalOfficer = async ( req , res , next ) => {
+    try {
+
+        const validatedData = createRegionalOfficerSchema.safeParse(req.body);
+
+        if(validatedData.error) {
+            return res.status(400).json({
+                status: "error",
+                message: "Unauthorized Access",
+            });
+        };
+
+        const regionalOfficeExist = await regionalOffice.exists({
+            _id: validatedData.data.regionalOfficeId,
+        });
+
+        if(!regionalOfficeExist) {
+            return res.status(400).json({
+                status: "error",
+                message: "Regional Office Not Found",
+            });
+        };
+
+        const regionalOfficerExist = await regionalOfficer.exists({
+            email: validatedData.data.email,
+        });
+
+        if(regionalOfficerExist) {
+            return res.status(400).json({
+                status: "error",
+                message: "Regional Officer Already Exist",
+            });
+        };
+
+        const isMailSent = sendMail({
+            from: `No-reply <${process.env.NO_REPLY_MAIL_ID}>`,
+            to: validatedData.data.email,
+            subject: "Account Created | GET SKY BUY",
+            html: `<h1>Account Created</h1><p>Your Account has been created successfully</p>`,
+        });
+
+        if(!isMailSent) {
+            return res.status(400).json({
+                status: "error",
+                message: "Unable to send mail",
+            });
+        };
+
+        const newRegionalOfficer = new regionalOfficer({
+            password: await hashPassword(validatedData.data.personalDetails.mobileNumber),
+            regionalOffice: validatedData.data.regionalOfficeId,
+            personalDetails: validatedData.data.personalDetails,
+            email: validatedData.data.email,
+            role: validatedData.data.role,
+            address: validatedData.data.address,
+            regionalOffice: validatedData.data.regionalOfficeId,
+        });
+
+        const savedRegionalOfficer = (await newRegionalOfficer.save());
+        const responseData = savedRegionalOfficer.toObject(); // Convert to plain object
+        delete responseData.password;
+        delete responseData.loggedIn;
+        delete responseData.authentication;
+        delete responseData.accountHistory;
+
+        return res.status(200).json({
+            status: "success",
+            message: "Regional Officer Created Successfully",
+            data: responseData,
+        });
+
     } catch (error) {
         next(error);
     };
