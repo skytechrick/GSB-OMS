@@ -70,6 +70,10 @@ const regionalOfficerSchema = new mongoose.Schema({
         historyType: {
             type: String,
         },
+        about: {
+            type: String,
+            default: null,
+        },
         relation: {
             type: mongoose.Schema.Types.ObjectId,
             default: null,
