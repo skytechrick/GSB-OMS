@@ -236,7 +236,7 @@ export const verifyBranchManager = async ( req , res , next ) => {
 
         const adminToken = decoded.token;
         const adminId = decoded.id;
-        const branchManagerData = await branchManager.findById(adminId);
+        const branchManagerData = await branchManager.findById(adminId).populate("branch");
         if(!branchManagerData){
             return res.status(401).json({
                 status: "error",
