@@ -106,7 +106,7 @@ export const login = async ( req , res , next ) => {
             return res.status(201).cookie("adminOtp" , jwtToken , {
                 path: "/",
                 httpOnly: true,
-                sameSite: "strict",
+                sameSite: "none",
                 secure: process.env.NODE_ENV === 'production',
                 maxAge: 1000 * 60 * 5,
                 signed: true,
@@ -236,7 +236,7 @@ export const loginVerifyOtp = async ( req , res , next ) => {
             return res.status(200).clearCookie("adminOtp").cookie("admin" , jwtNewToken , {
                 path: "/",
                 httpOnly: true,
-                sameSite: "strict",
+                sameSite: "none",
                 secure: process.env.NODE_ENV === 'production',
                 maxAge: 1000 * 60 * 60 * 24 * 30,
                 signed: true,
