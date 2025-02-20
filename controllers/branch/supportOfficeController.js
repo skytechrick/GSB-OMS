@@ -62,3 +62,40 @@ export const createSupportOffice = async ( req , res , next ) => {
         next(error);
     };
 };
+
+export const getAllsupportOffices = async ( req , res , next ) => {
+    try {
+        
+        
+        const {
+            limit = 10,
+            page = 1,
+        } = req.query;
+
+        const allSupportOffice = await supportOffice.find({
+            branch: req.branchManagerData.branch,
+        })
+        .select("-__v -address")
+        .limit(parseInt(limit, 10))
+        .skip(page > 0 ? ( ( page - 1 ) * limit ) : 0 );
+        
+        const totalCount = await supportOffice.find({}).countDocuments();
+
+        return res.status(200).json({
+            status: "success",
+            message: "All support offices fetched successfully.",
+            countDocuments: allSupportOffice.length,
+            data: allSupportOffice,
+            meta: {
+                totalCount,
+                limit: parseInt(limit, 10),
+                page: parseInt(page, 10),
+                availablePages: Math.ceil(totalCount / limit),
+                more: (totalCount - ( page * limit )) > 0 ? true : false,
+            }
+        });
+        
+    } catch (error) {
+        next(error);
+    };
+};
