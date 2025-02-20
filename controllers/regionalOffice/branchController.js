@@ -75,7 +75,9 @@ export const getAllBranch = async ( req , res , next ) => {
             page = 1,
         } = req.query;
 
-        const allBranch = await branch.find({})
+        const allBranch = await branch.find({
+            regionalOffice: req.regionalOfficer.regionalOffice,
+        })
         .select("-__v -address")
         .limit(parseInt(limit, 10))
         .skip(page > 0 ? ( ( page - 1 ) * limit ) : 0 );
