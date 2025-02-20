@@ -4,7 +4,8 @@ import helmet from "helmet";
 const securityMiddleware = (app) => {
     app.use(cors({
         origin: [
-            "http://localhost",
+            "http://localhost:3000",
+            "https://r55zzv6b-3000.inc1.devtunnels.ms",
         ],
         credentials: true,
         optionsSuccessStatus: 200,
