@@ -75,3 +75,16 @@ export const createBranchManagerSchema = z.object({
         state: z.string().min(3).max(255),
     }),
 });
+
+export const createSupportOfficeSchema = z.object({
+    supportOfficeName: z.string().min(4).max(255),
+    supportOfficeEmail: z.string().email().transform(str => str.toLowerCase()),
+    address: z.object({
+        address_line: z.string().min(3).max(255),
+        pinCode: z.string().max(6).min(6),
+        district: z.string().min(3).max(255),
+        city: z.string().min(3).max(255),
+        country: z.string().min(4).max(255),
+        state: z.string().min(3).max(255),
+    }),
+});

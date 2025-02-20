@@ -6,6 +6,8 @@ const securityMiddleware = (app) => {
         origin: [
             "http://localhost:3000",
             "https://r55zzv6b-3000.inc1.devtunnels.ms",
+            "https://workspace.getskybuy.in",
+            "https://dashboard.getskybuy.in",
         ],
         credentials: true,
         optionsSuccessStatus: 200,
