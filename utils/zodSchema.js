@@ -130,3 +130,23 @@ export const createSupportAssistantSchema = z.object({
         state: z.string().min(3).max(255),
     }),
 });
+export const createDeliveryAgentSchema = z.object({
+    supportOfficeId: z.string().min(24).max(24),
+    personalDetails: z.object({
+        firstName: z.string().min(3).max(255),
+        lastName: z.string().min(3).max(255).optional(),
+        mobileNumber: z.string().min(10).max(10).optional(),
+        dob: z.string().max(255).optional(),
+        gender: z.string().min(4).max(6).optional(),
+    }),
+    email: z.string().email().transform(str => str.toLowerCase()),
+    role: z.string().min(4).max(255).optional(),
+    address: z.object({
+        address_line: z.string().min(3).max(255),
+        pinCode: z.string().max(6).min(6),
+        district: z.string().min(3).max(255),
+        city: z.string().min(3).max(255),
+        country: z.string().min(4).max(255),
+        state: z.string().min(3).max(255),
+    }),
+});

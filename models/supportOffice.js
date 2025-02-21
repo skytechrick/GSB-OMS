@@ -16,6 +16,10 @@ const supporOfficeSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: "support_assistant",
     }],
+    deliveryAgents:[{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "delivery_agents",
+    }],
     supportOfficeEmail: {
         type: String,
         required: true,

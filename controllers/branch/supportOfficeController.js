@@ -1,10 +1,10 @@
 import supportOffice from "../../models/supportOffice.js"
 import branch from "../../models/branch.js"
 import supportAssistant from "../../models/supportAssistant.js"
-import { hashPassword } from "../../utils/passwordHandler.js"
-import { sendMail } from '../../utils/sendMail.js';
 import supportManager from "../../models/supportManager.js"
-import { createSupportOfficeSchema , createSupportManagerSchema , createSupportAssistantSchema } from "../../utils/zodSchema.js";
+import deliveryAgent from "../../models/deliveryAgent.js"
+import { hashPassword } from "../../utils/passwordHandler.js"
+import { createSupportOfficeSchema , createSupportManagerSchema , createSupportAssistantSchema , createDeliveryAgentSchema } from "../../utils/zodSchema.js";
 
 export const createSupportOffice = async ( req , res , next ) => {
     try {
@@ -260,7 +260,7 @@ export const createSupportAssistant = async ( req , res , next ) => {
 
         await newSupportAssistant.save();
 
-        const supportOfficeData = await supportAssistant.findByIdAndUpdate(validatedData.data.supportOfficeId,
+        const supportOfficeData = await supportOffice.findByIdAndUpdate(validatedData.data.supportOfficeId,
             { $push: { assistants: newSupportAssistant._id } },
         );
 
@@ -282,6 +282,7 @@ export const createSupportAssistant = async ( req , res , next ) => {
         next(error);
     };
 };
+
 export const getAllSupportAssistant = async ( req , res , next ) => {
     try {
         
@@ -311,6 +312,116 @@ export const getAllSupportAssistant = async ( req , res , next ) => {
             message: "All support assistant fetched successfully.",
             countDocuments: allSupportAssistant.length,
             data: allSupportAssistant,
+            meta: {
+                totalCount,
+                limit: parseInt(limit, 10),
+                page: parseInt(page, 10),
+                availablePages: Math.ceil(totalCount / limit),
+                more: (totalCount - ( page * limit )) > 0 ? true : false,
+            }
+        });
+
+    } catch (error) {
+        next(error);
+    };
+};
+
+export const createDeliveryAgent = async ( req , res , next ) => {
+    try {
+
+        const branchManagerData = req.branchManagerData;
+
+        const validatedData = createDeliveryAgentSchema.safeParse(req.body);
+
+        if(validatedData.error) {
+            return res.status(400).json({
+                status: "error",
+                message: "Unauthorized Access",
+            });
+        };
+
+        const deliveryAgentExist = await deliveryAgent.exists({
+            email: validatedData.data.email
+        });
+
+        if(deliveryAgentExist) {
+            return res.status(400).json({
+                status: "error",
+                message: "Support Assistant already exist.",
+            });
+        };
+
+        const hashedPassword = await hashPassword(validatedData.data.personalDetails.mobileNumber);
+
+        const newdeliveryAgent = new deliveryAgent({
+            supportOffice: validatedData.data.supportOfficeId,
+            personalDetails: validatedData.data.personalDetails,
+            email: validatedData.data.email,
+            password: hashedPassword,
+            role: validatedData.data.role,
+            address: validatedData.data.address,
+        });
+
+        await newdeliveryAgent.save();
+
+        const supportOfficeData = await supportOffice.findByIdAndUpdate(validatedData.data.supportOfficeId,
+            { $push: { deliveryAgents: newdeliveryAgent._id } },
+        );
+
+        branchManagerData.accountHistory.push({
+            historyType: "Delivery",
+            about: "Delivery Agent created : " + newdeliveryAgent.personalDetails.firstName,
+            relation: newdeliveryAgent._id,
+        });
+
+        await branchManagerData.save();
+
+        return res.status(201).json({
+            status: "success",
+            message: "Delivery agent created successfully.",
+            data: newdeliveryAgent,
+        });
+
+    } catch (error) {
+        next(error);
+    };
+};
+
+export const getAllDeliveryAgent = async ( req , res , next ) => {
+    try {
+        
+        const branchManagerData = req.branchManagerData;
+
+        const {
+            limit = 10,
+            page = 1,
+        } = req.query;
+
+        const allDeliveryAgent = await deliveryAgent
+        .find({
+            supportOffice: {
+                $in: [
+                    ...branchManagerData.branch.supportOffices.map(id => id.toString()),
+                ]
+            }
+        })
+        .select("-__v -address -password -loggedIn -authentication -accountHistory")
+        .limit(parseInt(limit, 10))
+        .skip(page > 0 ? ( ( page - 1 ) * limit ) : 0 );
+
+        const totalCount = await deliveryAgent.find({
+            supportOffice: {
+                $in: [
+                    ...branchManagerData.branch.supportOffices.map(id => id.toString()),
+                ]
+            }
+        }).countDocuments();
+
+        return res.status(200).json({
+            status: "success",
+            message: "All delivery agent fetched successfully.",
+            countDocuments: allDeliveryAgent.length,
+            data: allDeliveryAgent,
             meta: {
                 totalCount,
                 limit: parseInt(limit, 10),
