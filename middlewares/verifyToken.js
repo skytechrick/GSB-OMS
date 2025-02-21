@@ -140,7 +140,7 @@ export const verifyRegionalOfficer = async ( req , res , next ) => {
 
         const adminToken = decoded.token;
         const adminId = decoded.id;
-        const regionalOfficerData = await regionalOfficer.findById(adminId);
+        const regionalOfficerData = await regionalOfficer.findById(adminId).populate("regionalOffice");
         if(!regionalOfficerData){
             return res.status(401).json({
                 status: "error",
