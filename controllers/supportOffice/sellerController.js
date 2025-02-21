@@ -48,6 +48,35 @@ export const createSeller = async ( req , res , next ) => {
 export const getAllSellers = async ( req , res , next ) => {
     try {
 
+        const {
+            page = 1,
+            limit = 10,
+        } = req.query;
+
+        const supportManagerData = req.supportManagerData;
+
+        const sellers = await seller.find({ supportOffice: supportManagerData.supportOffice._id })
+        .limit(limit * 1)
+        .skip((page - 1) * limit)
+        .select("-password -address -supportOffice -bankAccount -documents -address -loggedIn -authentication")
+        .exec();
+
+        const totalCount = await seller.countDocuments({ supportOffice: supportManagerData.supportOffice._id });
+
+        return res.status(200).json({
+            status: "success",
+            message: "Sellers fetched successfully",
+            countDocuments: sellers.length,
+            data: sellers,
+            meta: {
+                totalCount,
+                limit: parseInt(limit, 10),
+                page: parseInt(page, 10),
+                availablePages: Math.ceil(totalCount / limit),
+                more: (totalCount - ( page * limit )) > 0 ? true : false,
+            }
+        });
+
     } catch (error) {
         next(error);
     };
