@@ -2,6 +2,8 @@ import { verifyToken } from '../utils/jwtHandler.js';
 import admin from '../models/admin.js';
 import branchManager from '../models/branchManager.js';
 import regionalOfficer from '../models/regionalOfficer.js';
+import seller from '../models/seller.js';
+import supportManager from '../models/supportManager.js';
 
 export const verifyHeadquater = async ( req , res , next ) => {
     try {
@@ -273,7 +275,7 @@ export const verifyBranchManager = async ( req , res , next ) => {
 
         if(branchManagerData.loggedIn.token !== adminToken){
             if(isWeb){
-                return res.status(401).clearCookie("admin").json({
+                return res.status(401).clearCookie("branchManager").json({
                     status: "error",
                     message: "Unauthorized access"
                 });
@@ -285,6 +287,102 @@ export const verifyBranchManager = async ( req , res , next ) => {
         };
 
         req.branchManagerData = branchManagerData;
+        
+        next();
+
+    } catch (error) {
+        next(error);
+    };
+};
+
+export const verifyOfficeManager = async ( req , res , next ) => {
+    try {
+        const isWeb = req.isWeb;
+        req.token = null;
+        if (isWeb) {
+            if (req.signedCookies.supportManager) {
+                req.token = req.signedCookies.supportManager;
+            };
+        }else{
+            if (req.headers.Authorization) {
+                const token = req.headers.Authorization.split(' ')[1];
+                req.token = token;
+            };
+        };
+
+        const token = req.token;
+        if(!token){
+            return res.status(401).json({
+                status: "error",
+                message: "Unauthorized access"
+            });
+        };
+
+        const decoded = verifyToken(token);
+        if(!decoded){
+            if(isWeb){
+                return res.status(401).clearCookie("supportManager").json({
+                    status: "error",
+                    message: "Unauthorized access"
+                });
+            }
+            return res.status(401).json({
+                status: "error",
+                message: "Unauthorized access"
+            });
+        };
+
+        const adminToken = decoded.token;
+        const adminId = decoded.id;
+        const officeManagerData = await supportManager.findById(adminId).populate("supportOffice");
+        if(!officeManagerData){
+            return res.status(401).json({
+                status: "error",
+                message: "Unauthorized access"
+            });
+        };
+        if(officeManagerData.ban){
+            if(isWeb){
+                return res.status(401).clearCookie("supportManager").json({
+                    status: "error",
+                    message: "You are banned",
+                    reason: officeManagerData.banReason
+                });
+            };
+            return res.status(401).json({
+                status: "error",
+                message: "You are banned",
+                reason: officeManagerData.banReason
+            });
+        };
+
+        if(officeManagerData.isVerified === false){
+            if(isWeb){
+                return res.status(401).clearCookie("supportManager").json({
+                    status: "error",
+                    message: "Your account is not verified"
+                });
+            }
+            return res.status(401).json({
+                status: "error",
+                message: "Your account is not verified"
+            });
+        };
+
+        if(officeManagerData.loggedIn.token !== adminToken){
+            if(isWeb){
+                return res.status(401).clearCookie("supportManager").json({
+                    status: "error",
+                    message: "Unauthorized access"
+                });
+            }
+            return res.status(401).json({
+                status: "error",
+                message: "Unauthorized access"
+            });
+        };
+
+        req.supportManagerData = officeManagerData;
         
         next();
 

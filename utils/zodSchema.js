@@ -150,3 +150,38 @@ export const createDeliveryAgentSchema = z.object({
         state: z.string().min(3).max(255),
     }),
 });
+
+export const createSellerSchema = z.object({
+    personalDetails: z.object({
+        name: z.string().min(3).max(255),
+        dob: z.string().max(255),
+        mobileNumber: z.string().min(10).max(10),
+        altMobileNumber: z.string().min(10).max(10),
+        gender: z.string().min(4).max(6),
+    }),
+    email: z.string().email(),
+    shopDetails: z.object({
+        shopName: z.string(),
+        shopAddress: z.string().url(),
+        shopCategory: z.string(),
+        shopContact: z.string().min(10).max(10),
+    }),
+    bankAccount: z.object({
+        bankName: z.string(),
+        beneficiaryName: z.string(),
+        accountNumber: z.string(),
+        ifscCode: z.string()
+    }),
+    documents: z.object({
+        panId: z.string(),
+        aadhaarId: z.string() 
+    }),
+    address: z.object({
+        address_line: z.string().min(3).max(255),
+        pinCode: z.string().max(6).min(6),
+        district: z.string().min(3).max(255),
+        city: z.string().min(3).max(255),
+        state: z.string().min(3).max(255),
+        country: z.string().min(4).max(255),
+    }),
+});
