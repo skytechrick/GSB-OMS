@@ -83,7 +83,9 @@ export const getAllsupportOffices = async ( req , res , next ) => {
         .limit(parseInt(limit, 10))
         .skip(page > 0 ? ( ( page - 1 ) * limit ) : 0 );
         
-        const totalCount = await supportOffice.find({}).countDocuments();
+        const totalCount = await supportOffice.find({
+            branch: req.branchManagerData.branch,
+        }).countDocuments();
 
         return res.status(200).json({
             status: "success",
@@ -201,7 +203,13 @@ export const getAllSupportManager = async ( req , res , next ) => {
         .limit(parseInt(limit, 10))
         .skip(page > 0 ? ( ( page - 1 ) * limit ) : 0 );
 
-        const totalCount = await supportManager.find({}).countDocuments();
+        const totalCount = await supportManager.find({
+            supportOffice: {
+                $in: [
+                    ...branchManagerData.branch.supportOffices.map(id => id.toString()),
+                ]
+            }
+        }).countDocuments();
 
         return res.status(200).json({
             status: "success",
@@ -305,7 +313,13 @@ export const getAllSupportAssistant = async ( req , res , next ) => {
         .limit(parseInt(limit, 10))
         .skip(page > 0 ? ( ( page - 1 ) * limit ) : 0 );
 
-        const totalCount = await supportAssistant.find({}).countDocuments();
+        const totalCount = await supportAssistant.find({
+            supportOffice: {
+                $in: [
+                    ...branchManagerData.branch.supportOffices.map(id => id.toString()),
+                ]
+            }
+        }).countDocuments();
 
         return res.status(200).json({
             status: "success",
