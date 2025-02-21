@@ -1,9 +1,10 @@
 import supportOffice from "../../models/supportOffice.js"
 import branch from "../../models/branch.js"
+import supportAssistant from "../../models/supportAssistant.js"
 import { hashPassword } from "../../utils/passwordHandler.js"
 import { sendMail } from '../../utils/sendMail.js';
 import supportManager from "../../models/supportManager.js"
-import { createSupportOfficeSchema , createSupportManagerSchema } from "../../utils/zodSchema.js";
+import { createSupportOfficeSchema , createSupportManagerSchema , createSupportAssistantSchema } from "../../utils/zodSchema.js";
 
 export const createSupportOffice = async ( req , res , next ) => {
     try {
@@ -207,6 +208,109 @@ export const getAllSupportManager = async ( req , res , next ) => {
             message: "All support managers fetched successfully.",
             countDocuments: allSupportManager.length,
             data: allSupportManager,
+            meta: {
+                totalCount,
+                limit: parseInt(limit, 10),
+                page: parseInt(page, 10),
+                availablePages: Math.ceil(totalCount / limit),
+                more: (totalCount - ( page * limit )) > 0 ? true : false,
+            }
+        });
+
+    } catch (error) {
+        next(error);
+    };
+};
+
+export const createSupportAssistant = async ( req , res , next ) => {
+    try {
+
+        const branchManagerData = req.branchManagerData;
+
+        const validatedData = createSupportAssistantSchema.safeParse(req.body);
+
+        if(validatedData.error) {
+            return res.status(400).json({
+                status: "error",
+                message: "Unauthorized Access",
+            });
+        };
+
+        const supportAssistantExist = await supportAssistant.exists({
+            email: validatedData.data.email
+        });
+
+        if(supportAssistantExist) {
+            return res.status(400).json({
+                status: "error",
+                message: "Support Assistant already exist.",
+            });
+        };
+
+        const hashedPassword = await hashPassword(validatedData.data.personalDetails.mobileNumber);
+
+        const newSupportAssistant = new supportAssistant({
+            supportOffice: validatedData.data.supportOfficeId,
+            personalDetails: validatedData.data.personalDetails,
+            email: validatedData.data.email,
+            password: hashedPassword,
+            role: validatedData.data.role,
+            address: validatedData.data.address,
+        });
+
+        await newSupportAssistant.save();
+
+        const supportOfficeData = await supportAssistant.findByIdAndUpdate(validatedData.data.supportOfficeId,
+            { $push: { assistants: newSupportAssistant._id } },
+        );
+
+        branchManagerData.accountHistory.push({
+            historyType: "support",
+            about: "Support assistant created : " + newSupportAssistant.personalDetails.firstName,
+            relation: newSupportAssistant._id,
+        });
+
+        await branchManagerData.save();
+
+        return res.status(201).json({
+            status: "success",
+            message: "Support Assistant created successfully.",
+            data: newSupportAssistant,
+        });
+
+    } catch (error) {
+        next(error);
+    };
+};
+export const getAllSupportAssistant = async ( req , res , next ) => {
+    try {
+        
+        const branchManagerData = req.branchManagerData;
+
+        const {
+            limit = 10,
+            page = 1,
+        } = req.query;
+
+        const allSupportAssistant = await supportAssistant
+        .find({
+            supportOffice: {
+                $in: [
+                    ...branchManagerData.branch.supportOffices.map(id => id.toString()),
+                ]
+            }
+        })
+        .select("-__v -address -password -loggedIn -authentication -accountHistory")
+        .limit(parseInt(limit, 10))
+        .skip(page > 0 ? ( ( page - 1 ) * limit ) : 0 );
+
+        const totalCount = await supportAssistant.find({}).countDocuments();
+
+        return res.status(200).json({
+            status: "success",
+            message: "All support assistant fetched successfully.",
+            countDocuments: allSupportAssistant.length,
+            data: allSupportAssistant,
             meta: {
                 totalCount,
                 limit: parseInt(limit, 10),
