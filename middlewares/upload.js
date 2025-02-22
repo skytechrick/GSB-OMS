@@ -1,7 +1,7 @@
 import multer from 'multer';
 import path from 'path';
 
-const storage = multer.diskStorage({
+const productStorage = multer.diskStorage({
     destination: (req, file, cb) => {
         cb(null, './public/productImages');
     },
@@ -10,7 +10,7 @@ const storage = multer.diskStorage({
     }
 });
 
-const fileFilter = (req, file, cb) => {
+const imageFileFilter = (req, file, cb) => {
     const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif', 'image/webp'];
     
     if (allowedTypes.includes(file.mimetype)) {
@@ -22,14 +22,14 @@ const fileFilter = (req, file, cb) => {
   
 
 const uploadProductImages = multer({
-    storage,
+    productStorage,
     limits: {
         fileSize: 1024 * 1024 * 4,
     },
-    fileFilter,
+    imageFileFilter,
 });
 
-const uploadProductMiddleware = uploadProductImages.fields([
+export const uploadProductMiddleware = uploadProductImages.fields([
     { name: 'img1', maxCount: 1 },
     { name: 'img2', maxCount: 1 },
     { name: 'img3', maxCount: 1 },
@@ -39,4 +39,3 @@ const uploadProductMiddleware = uploadProductImages.fields([
     { name: 'img7', maxCount: 1 }
 ]);
 
-export default uploadProductMiddleware;
