@@ -1,9 +1,12 @@
 import multer from 'multer';
 import path from 'path';
+import fs from 'fs';
 
 const productStorage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, './public/productImages');
+        const tempDir = './public/tempImages';
+        fs.mkdirSync(tempDir, { recursive: true });
+        cb(null, tempDir);
     },
     filename: (req, file, cb) => {
         cb(null, `${req.body.title.slice(0, 40)}-${Date.now()}-${file.originalname}`);
@@ -13,20 +16,17 @@ const productStorage = multer.diskStorage({
 const imageFileFilter = (req, file, cb) => {
     const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif', 'image/webp'];
     
-    if (allowedTypes.includes(file.mimetype)) {
-        cb(null, true);
-    } else {
-        cb(new multer.MulterError('LIMIT_UNEXPECTED_FILE', 'Invalid file type. Only images are allowed.'));
-    };
+    allowedTypes.includes(file.mimetype)
+        ? cb(null, true)
+        : cb(new multer.MulterError('LIMIT_UNEXPECTED_FILE', 'Invalid file type. Only images are allowed.'));
 };
-  
 
 const uploadProductImages = multer({
-    productStorage,
+    storage: productStorage,
     limits: {
         fileSize: 1024 * 1024 * 4,
     },
-    imageFileFilter,
+    fileFilter: imageFileFilter,
 });
 
 export const uploadProductMiddleware = uploadProductImages.fields([
