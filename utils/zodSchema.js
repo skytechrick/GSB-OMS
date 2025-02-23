@@ -159,11 +159,11 @@ export const createSellerSchema = z.object({
         altMobileNumber: z.string().min(10).max(10),
         gender: z.string().min(4).max(6),
     }),
+    categories: z.array(z.string()),
     email: z.string().email(),
     shopDetails: z.object({
         shopName: z.string(),
         shopAddress: z.string().url(),
-        shopCategory: z.string(),
         shopContact: z.string().min(10).max(10),
     }),
     bankAccount: z.object({

@@ -33,6 +33,10 @@ const sellerSchema = new mongoose.Schema({
         min: 4,
         lowercase: true,
     },
+    categories: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "categories",
+    }],
     shopDetails:{
         shopName: {
             type: String,
@@ -45,10 +49,6 @@ const sellerSchema = new mongoose.Schema({
             required: true,
             max: 255,
             min: 4,
-        },
-        shopCategory: {
-            type: String,
-            required: true,
         },
         shopContact: {
             type: Number,
