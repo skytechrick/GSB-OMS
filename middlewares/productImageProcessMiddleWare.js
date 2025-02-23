@@ -2,17 +2,10 @@ import fs from 'fs';
 import path from 'path';
 import sharp from 'sharp';
 
-const ensureDirExists = (dir) => {
-    if (!fs.existsSync(dir)) {
-        fs.mkdirSync(dir, { recursive: true });
-    }
-};
-
 const processImage = async (fileName) => {
     try {
-        const inputPath = path.join(__dirname, './public/tempImages', fileName);
-        const outputFilePath = path.join(__dirname, './public/product-images', `${path.parse(fileName).name}-${Date.now()}-saved.webp`);
-        ensureDirExists(outputFilePath);
+        const inputPath = path.join(process.cwd(), './public/tempImages', fileName);
+        const outputFilePath = path.join(process.cwd(), './public/product-images', `${path.parse(fileName).name}-${Date.now()}-saved.webp`);
 
         let image = sharp(inputPath);
         const metaData = await image.metadata();
@@ -50,6 +43,7 @@ const processImage = async (fileName) => {
 
 export const productImageProcessMiddleWare = async ( req , res , next ) => {
     const processedImages = [];
+
     try {
         if (!req.files) {
             return res.status(400).json({
@@ -57,8 +51,7 @@ export const productImageProcessMiddleWare = async ( req , res , next ) => {
                 message: "No images were uploaded"
             });
         };
-        // const files = Object.assign({}, req.files);
-
+        
         const files = req.files;
         const imageProcessingPromises = [];
 
@@ -70,7 +63,10 @@ export const productImageProcessMiddleWare = async ( req , res , next ) => {
 
                 imageProcessingPromises.push(
                     processImage(fileName).then((processedImage) => {
-                        processedImages.push({ field: imageField, image: processedImage });
+                        processedImages.push({
+                            field: imageField,
+                            image: processedImage,
+                        });
                     })
                 );
             };
@@ -78,10 +74,18 @@ export const productImageProcessMiddleWare = async ( req , res , next ) => {
 
         await Promise.all(imageProcessingPromises);
 
+        for (let i = 1; i <= 7; i++) {
+            const imageField = `img${i}`;
+
+            if (files[imageField] && files[imageField][0]) {
+                fs.unlinkSync(path.join(process.cwd(), './public/tempImages', files[imageField][0].filename));
+            };
+        };
+
         req.processedImages = processedImages;
         next();
     } catch (error) {
-        req.isProductImageUpload = true;
+        req.isProductImageUploaded = true;
         req.uploadedImages = req.files;
         req.convertedImages = processedImages;
         next(error);

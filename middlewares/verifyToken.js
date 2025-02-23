@@ -431,7 +431,7 @@ export const verifySupportAssistant = async ( req , res , next ) => {
 
         const adminToken = decoded.token;
         const adminId = decoded.id;
-        const officeManagerData = await supportAssistant.findById(adminId).populate("supportOffice");
+        const officeManagerData = await supportAssistant.findById(adminId).populate("supportOffice").exec();
         if(!officeManagerData){
             return res.status(401).json({
                 status: "error",

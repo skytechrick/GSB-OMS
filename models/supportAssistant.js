@@ -51,7 +51,7 @@ const supportAssistantSchema = new Schema({
     },
     supportOffice: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "support_offices",
+        ref: "support_office",
     },
     isVerified: {
         type: Boolean,

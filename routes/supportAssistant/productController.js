@@ -4,5 +4,6 @@ export default productRouter;
 
 import { createProduct } from '../../controllers/supportAssistant/productController.js';
 import { uploadProductMiddleware } from '../../middlewares/upload.js';
+import { productImageProcessMiddleWare } from '../../middlewares/productImageProcessMiddleWare.js';
 
-productRouter.get("/create" , uploadProductMiddleware , createProduct );
+productRouter.post("/create" , uploadProductMiddleware , productImageProcessMiddleWare , createProduct );
