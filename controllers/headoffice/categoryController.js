@@ -59,9 +59,6 @@ export const createCategory = async ( req , res , next ) => {
                 message: "Category already exists"
             });
         };
-
-
-
         
         const newCategory = new category({
             name: name,

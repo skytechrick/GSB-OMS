@@ -36,6 +36,10 @@ const supporOfficeSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: "sellers",
     }],
+    pinCodes: [{
+        type: Number,
+        required: true,
+    }],
     address: {
         address_line: {
             type: String,

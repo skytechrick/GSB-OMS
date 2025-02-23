@@ -8,12 +8,6 @@ const subCategorySchema = new mongoose.Schema({
         unique: true,
         maxlength: 255,
     },
-    description: {
-        type: String,
-        required: true,
-        trim: true,
-        maxlength: 500,
-    },
     status: {
         type: Boolean,
         default: true,
@@ -21,10 +15,6 @@ const subCategorySchema = new mongoose.Schema({
     category: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "category",
-    },
-    image: {
-        type: String,
-        default: null,
     },
     createdAt: {
         type: Date,

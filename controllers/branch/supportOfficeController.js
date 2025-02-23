@@ -37,6 +37,9 @@ export const createSupportOffice = async ( req , res , next ) => {
         const newSupportOffice = new supportOffice({
             supportOfficeName: validatedData.data.supportOfficeName,
             supportOfficeEmail: validatedData.data.supportOfficeEmail,
+            pinCodes: [
+                ...validatedData.data.pinCode
+            ],
             address: validatedData.data.address,
             branch: branchManagerData.branch,
         });
