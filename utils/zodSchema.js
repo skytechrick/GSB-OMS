@@ -185,3 +185,13 @@ export const createSellerSchema = z.object({
         country: z.string().min(4).max(255),
     }),
 });
+
+export const createProductSchema = z.object({
+    name: z.string().min(3).max(255),
+    description: z.string().min(3).max(255),
+    price: z.number().min(0),
+    quantity: z.number().min(0),
+    category: z.string().min(3).max(255),
+    subCategory: z.string().min(3).max(255),
+    sellerId: z.string().min(24).max(24),
+});
