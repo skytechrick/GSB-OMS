@@ -35,7 +35,7 @@ const sellerSchema = new mongoose.Schema({
     },
     categories: [{
         type: mongoose.Schema.Types.ObjectId,
-        ref: "categories",
+        ref: "category",
     }],
     shopDetails:{
         shopName: {

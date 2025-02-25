@@ -187,11 +187,27 @@ export const createSellerSchema = z.object({
 });
 
 export const createProductSchema = z.object({
-    name: z.string().min(3).max(255),
-    description: z.string().min(3).max(255),
-    price: z.number().min(0),
-    quantity: z.number().min(0),
+    sellerId: z.string().min(24).max(24),
     category: z.string().min(3).max(255),
     subCategory: z.string().min(3).max(255),
-    sellerId: z.string().min(24).max(24),
+    title: z.string().min(3).max(255),
+    description: z.string().min(3).max(5000),
+    variants: z.string(),
+    // variants: z.array(z.object({
+        // option: z.string().min(1).max(255),
+        // availableQuantity: z.string().min(1).max(255),
+    // })),
+    specificationTable: z.string(),
+    // specificationTable: z.array(z.object({
+    //     key: z.string().min(1).max(255),
+    //     value: z.string().min(1).max(2000),
+    // })),
+    keywords: z.string().min(3).max(255),
+    mrp: z.string(),
+    sellerPrice: z.string(),
+    localDelivery: z.string(),
+    defaultDelivery: z.string(),
+    videos: z.string(),
+    gender: z.string().min(3).max(255),
+    ageGroup: z.string().min(3).max(255),
 });

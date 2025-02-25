@@ -31,7 +31,7 @@ export const localDeliveryPriceCalculation = (sellerPrice) => {
 
 };
 
-export const anywhereDeliveryPriceCalculation = (sellerPrice) => {
+export const defaultDeliveryPriceCalculation = (sellerPrice) => {
 
     const sent = (sellerPrice + averageAnywhereDeliveryCharge + averagePackagingCharge + ((platformCommission / 100) * sellerPrice)) / (1 - (razorpayCharge / 100))
 

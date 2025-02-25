@@ -9,10 +9,14 @@ const productSchema = new mongoose.Schema({
     title: {
         type: String,
         required: true,
+        min: 3,
+        max: 255,
     },
     description: {
         type: String,
-        required: false,
+        required: true,
+        min: 3,
+        max: 5000,
     },
     variants: [
         {
@@ -34,6 +38,10 @@ const productSchema = new mongoose.Schema({
             type: String,
         },
     }],
+    keywords: {
+        type: String,
+        default: "",
+    },
     rating: {
         type: Number,
         default: 0,
@@ -72,10 +80,6 @@ const productSchema = new mongoose.Schema({
         default: 0,
         max: 50,
     },
-    keywords: {
-        type: String,
-        default: "",
-    },
     isCodAvailable: {
         type: Boolean,
         default: false,
@@ -87,6 +91,14 @@ const productSchema = new mongoose.Schema({
     isExchangeable: {
         type: Boolean,
         default: false,
+    },
+    isLocalFreeDelivery: {
+        type: Boolean,
+        default: false,
+    },
+    localDeliveryCharge: {
+        type: Number,
+        default: 0,
     },
     isFreeDelivery: {
         type: Boolean,
@@ -104,7 +116,7 @@ const productSchema = new mongoose.Schema({
         type: Boolean,
         default: false,
     },
-    mediaHub: {
+    media: {
         images: {
             type: Array,
             default: [],
