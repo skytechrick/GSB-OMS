@@ -200,6 +200,9 @@ export const createProduct = async ( req , res , next ) => {
 
         await newProduct.save();
 
+        searchedSeller.products.push(newProduct._id);
+        await searchedSeller.save();
+
         return res.status(201).json({
             status: "success",
             message: "Product created successfully"
