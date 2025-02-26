@@ -34,7 +34,9 @@ const processImage = async (fileName) => {
             }).toFormat('webp', {
                 quality
             }).toFile(outputFilePath)
-        
+            
+            image = null;
+            sharp.cache(false);
         return path.basename(outputFilePath);
     } catch (error) {
         throw error;
@@ -74,11 +76,19 @@ export const productImageProcessMiddleWare = async ( req , res , next ) => {
 
         await Promise.all(imageProcessingPromises);
 
+        for (let i = 1; i <= 7; i++) {
+            const imageField = `img${i}`;
+
+            if (files[imageField] && files[imageField][0]) {
+                fs.unlinkSync(path.join(process.cwd(), './public/tempImages', files[imageField][0].filename));
+            };
+        };
+        
         req.processedImages = processedImages;
         next();
     } catch (error) {
         req.isProductImageUploaded = true;
-        req.deleteFiles = files;
+        req.deleteFiles = req.files;
         req.convertedImages = processedImages;
         next(error);
     };
