@@ -36,16 +36,23 @@ const generateUniqueUrl = (length = 10) => {
 export const createProduct = async ( req , res , next ) => {
     try {
 
+        const images = req.processedImages.map(e=> e.image);
         const supportAssistantData = req.supportAssistantData;
 
+        const deleteFiles = async () => {
+            await Promise.all(
+                images.map(e => fs.unlink(path.join(process.cwd(), './public/product-images', e)))
+            );
+        };
+
         const body = Object.assign({}, req.body);
-        // console.log(req.processedImages);
         const validateData = createProductSchema.safeParse(body);
         
         if (!validateData.success) {
+            await deleteFiles();
             return res.status(400).json({
                 status: "error",
-                message: validateData.error.errors
+                message: "Invalid data",
             });
         };
         
@@ -65,11 +72,8 @@ export const createProduct = async ( req , res , next ) => {
             };
         };
         
-        
-        
-        
-        
         if(body.videos.length > 3) {
+            await deleteFiles();
             return res.status(400).json({
                 status: "error",
                 message: "Maximum 3 videos are allowed"
@@ -84,13 +88,10 @@ export const createProduct = async ( req , res , next ) => {
             return s;
         }).filter(e => e !== null);
         
-        
-        
-        
-        
         const categoryExists = await category.findById(body.category).populate("subCategory").exec();
         
         if (!categoryExists) {
+            await deleteFiles();
             return res.status(400).json({
                 status: "error",
                 message: "Category does not exist"
@@ -100,6 +101,7 @@ export const createProduct = async ( req , res , next ) => {
         const searchedSeller = await seller.findById(body.sellerId).populate("categories").exec();
         
         if(!searchedSeller) {
+            await deleteFiles();
             return res.status(400).json({
                 status: "error",
                 message: "Seller does not exist"
@@ -109,6 +111,7 @@ export const createProduct = async ( req , res , next ) => {
         const categoryExistsInSeller = searchedSeller.categories.find(e => e.name === categoryExists.name);
 
         if(!categoryExistsInSeller) {
+            await deleteFiles();
             return res.status(400).json({
                 status: "error",
                 message: "Seller does not have this category"
@@ -118,14 +121,15 @@ export const createProduct = async ( req , res , next ) => {
         const subCategoryExists = categoryExists.subCategory.find(e => e._id.toString() === body.subCategory);
         
         if(!subCategoryExists) {
+            await deleteFiles();
             return res.status(400).json({
                 status: "error",
                 message: "Sub Category does not exist"
             });
         };
 
-
         if(body.variants.length === 0) {
+            await deleteFiles();
             return res.status(400).json({
                 status: "error",
                 message: "Atleast one variant is required"
@@ -133,6 +137,7 @@ export const createProduct = async ( req , res , next ) => {
         };
 
         if(body.title.length < 3 || body.title.length > 255) {
+            await deleteFiles();
             return res.status(400).json({
                 status: "error",
                 message: "Title length should be between 3 to 255"
@@ -140,15 +145,12 @@ export const createProduct = async ( req , res , next ) => {
         };
 
         if(body.description.length < 3 || body.description.length > 5000) {
+            await deleteFiles();
             return res.status(400).json({
                 status: "error",
                 message: "Description length should be between 3 to 5000"
             });
         };
-
-
-
-
 
         const localPrice =  localDeliveryPriceCalculation(parseInt(body.sellerPrice, 10));
         const defaultPrice =  defaultDeliveryPriceCalculation(parseInt(body.sellerPrice, 10));
@@ -156,8 +158,6 @@ export const createProduct = async ( req , res , next ) => {
 
         const localDeliveryCharge = mrp - localPrice < 0;
         const deliveryCharge = mrp - defaultPrice < 0;
-
-
 
         const newProductObject = {
             url: newUrl,
@@ -184,7 +184,7 @@ export const createProduct = async ( req , res , next ) => {
             isVerified: false,  // managers will change this
             gsbCoins: 2, // managers will change this
             media: {
-                images: req.processedImages.map(e=> e.image),
+                images: images,
                 videos: videos,
             },
             gender: body.gender,
@@ -206,6 +206,11 @@ export const createProduct = async ( req , res , next ) => {
         });
 
     } catch (error) {
+
+        await Promise.all(
+            req.processedImages.map(e => fs.unlink(path.join(process.cwd(), './public/product-images', e.image)))
+        );
+
         next(error);
     };
 };
