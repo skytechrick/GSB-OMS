@@ -17,6 +17,24 @@ export const createSeller = async ( req , res , next ) => {
             });
         };
 
+        const search = await seller.exists({ "personalDetails.mobileNumber": validatedData.data.personalDetails.mobileNumber });
+
+        if(search){
+            return res.status(400).json({
+                status: "error",
+                message: "Seller already exists",
+            });
+        };
+
+        const searchEmail = await seller.exists({ "personalDetails.email": validatedData.data.personalDetails.email });
+
+        if(searchEmail){
+            return res.status(400).json({
+                status: "error",
+                message: "Seller already exists",
+            });
+        };
+
         const hashedPassword = await hashPassword(validatedData.data.personalDetails.mobileNumber);
 
         const newSeller = new seller({
