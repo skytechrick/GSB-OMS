@@ -180,7 +180,7 @@ export const verifyRegionalOfficer = async ( req , res , next ) => {
 
         if(regionalOfficerData.loggedIn.token !== adminToken){
             if(isWeb){
-                return res.status(401).clearCookie("admin").json({
+                return res.status(401).clearCookie("regionalOfficer").json({
                     status: "error",
                     message: "Unauthorized access"
                 });
@@ -191,7 +191,7 @@ export const verifyRegionalOfficer = async ( req , res , next ) => {
             });
         };
 
-        req.regionalOfficer = regionalOfficerData;
+        req.regionalOfficerData = regionalOfficerData;
         
         next();
 

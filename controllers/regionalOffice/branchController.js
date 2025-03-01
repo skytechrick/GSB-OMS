@@ -8,7 +8,7 @@ import { createBranchSchema , createBranchManagerSchema } from '../../utils/zodS
 export const createBranch = async (req, res) => {
     try {
         
-        const regionalOfficerData = req.regionalOfficer;
+        const regionalOfficerData = req.regionalOfficerData;
 
 
         const validatedData = createBranchSchema.safeParse(req.body);
@@ -38,13 +38,13 @@ export const createBranch = async (req, res) => {
             branchName: validatedData.data.branchName,
             branchEmail: validatedData.data.branchEmail,
             address: validatedData.data.address,
-            regionalOffice: regionalOfficerData.regionalOffice,
+            regionalOffice: regionalOfficerData.regionalOffice._id,
         });
 
         await newBranch.save();
 
         await regionalOffice.findByIdAndUpdate(
-            regionalOfficerData.regionalOffice,
+            regionalOfficerData.regionalOffice._id,
             { $push: { branches: newBranch._id } },
         );
 
@@ -76,14 +76,14 @@ export const getAllBranch = async ( req , res , next ) => {
         } = req.query;
 
         const allBranch = await branch.find({
-            regionalOffice: req.regionalOfficer.regionalOffice,
+            regionalOffice: req.regionalOfficerData.regionalOffice._id,
         })
         .select("-__v -address")
         .limit(parseInt(limit, 10))
         .skip(page > 0 ? ( ( page - 1 ) * limit ) : 0 );
         
         const totalCount = await branch.find({
-            regionalOffice: req.regionalOfficer.regionalOffice,
+            regionalOffice: req.regionalOfficerData.regionalOffice._id,
         }).countDocuments();
 
         return res.status(200).json({
@@ -108,7 +108,7 @@ export const getAllBranch = async ( req , res , next ) => {
 export const createBranchManager = async ( req , res , next ) => {
     try {
         
-        const regionalOfficerData = req.regionalOfficer;
+        const regionalOfficerData = req.regionalOfficerData;
 
         const validatedData = createBranchManagerSchema.safeParse(req.body);
 
@@ -183,8 +183,14 @@ export const getAllBranchManager = async ( req , res , next ) => {
             page = 1,
         } = req.query;
 
+        const regionalOfficerData = req.regionalOfficerData;
+
+        const regionalOfficeData = await regionalOffice.findById(regionalOfficerData.regionalOffice._id).select("branches").populate("branches").exec();
+
+        const allBranchIds = regionalOfficeData.branches.map( branch => branch._id );
+
         const allBranchManager = await branchManager.find({
-            regionalOffice: req.regionalOfficer.regionalOffice,
+            branch: { $in: allBranchIds },
         })
         .select("-__v -address -loggedIn -authentication -password -accountHistory")
         .limit(parseInt(limit, 10))
