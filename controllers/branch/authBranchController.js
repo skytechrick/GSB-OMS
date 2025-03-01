@@ -51,7 +51,7 @@ export const login = async ( req , res , next ) => {
         };
 
         const isMailSent = await sendMail({
-            from: `No-reply <${process.env.NO_REPLY_MAIL_ID}>`,
+            from: `No-Reply <${process.env.NO_REPLY_MAIL_ID}>`,
             to: email,
             subject: "Branch manager Login | Notification",
             html: `<h1>Branch manager login OTP: ${otp}</h1>${Date().toLocaleString("en-IN")}`,
