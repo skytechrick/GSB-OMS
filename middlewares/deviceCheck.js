@@ -1,6 +1,9 @@
 
 export default async ( req , res , next ) => {
     try {
+        
+        req.xForwardIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+        
         const userAgent = req.headers["user-agent"] || "";
         
         const blockedUserAgents = [

@@ -6,7 +6,6 @@ import connectDB from './config/db.js';
 import errorHandler from './middlewares/errorHandler.js';
 import morganMiddleware from './middlewares/accessHandler.js';
 import securityMiddleware from './middlewares/securityMiddleware.js';
-import deviceCheck from './middlewares/deviceCheck.js';
 import api from './routes/api.js';
 
 dotenv.config();
@@ -35,6 +34,8 @@ app.get('/', ( req , res , next ) => {
 
 app.use(errorHandler);
 
-app.listen(process.env.PORT, () => {
-    console.log(`Server is running on port ${process.env.PORT}`);
-});
+// app.listen(process.env.PORT, () => {
+//     console.log(`Server is running on port ${process.env.PORT}`);
+// });
+
+export default app;

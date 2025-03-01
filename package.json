@@ -13,8 +13,8 @@
     },
     "homepage": "https://github.com/skytechrick/officialsGetskybuyWorkspace#readme",
     "scripts": {
-        "dev": "nodemon ./app.js",
-        "start": "node ./app.js"
+        "dev": "nodemon ./server.cjs",
+        "start": "node ./server.cjs"
     },
     "author": "SKY TECH - RICK, GET SKY BUY",
     "license": "ISC",
