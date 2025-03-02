@@ -88,3 +88,55 @@ export const verifyNewProducts = async ( req , res , next ) => {
         next(error);
     };
 };
+
+
+export const getProductByFilter = async ( req , res , next ) => {
+    try {
+
+        const {
+            page = 1,
+            limit = 10,
+        } = req.query;
+
+        const filterQuery = {
+            supportOffice: req.supportManagerData.supportOffice._id.toString(),
+            isVerified: req.query.isVerified === "1" ? true : req.query.isVerified === "0"? false : undefined,
+            isAvailable: req.query.isAvailable === "1" ? true : req.query.isAvailable === "0"? false : undefined,
+            isCodAvailable: req.query.isCodAvailable === "1" ? true : req.query.isCodAvailable === "0"? false : undefined,
+            isReturnable: req.query.isReturnable === "1" ? true : req.query.isReturnable === "0"? false : undefined,
+            isExchangeable: req.query.isExchangeable === "1" ? true : req.query.isExchangeable === "0"? false : undefined,
+            isLocalFreeDelivery: req.query.isLocalFreeDelivery === "1" ? true : req.query.isLocalFreeDelivery === "0"? false : undefined,
+            isFreeDelivery: req.query.isFreeDelivery === "1" ? true : req.query.isFreeDelivery === "0"? false : undefined,
+        };
+
+        Object.keys(filterQuery).forEach(key => {
+            if (filterQuery[key] === undefined) {
+                delete filterQuery[key];
+            }
+        });
+
+        const products = await product
+            .find(filterQuery)
+            .limit(parseInt(limit, 10))
+            .skip((parseInt(page, 10) - 1) * limit)
+            .exec();
+
+        const totalCount = await product.countDocuments(filterQuery).exec();
+
+        return res.status(200).json({
+            status: "success",
+            total: products.length,
+            products,
+            meta: {
+                totalCount,
+                limit: parseInt(limit, 10),
+                page: parseInt(page, 10),
+                availablePages: Math.ceil(totalCount / limit),
+                more: (totalCount - ( parseInt(page, 10) * parseInt(limit, 10) )) > 0 ? true : false,
+            }
+        });
+
+    } catch (error) {
+        next(error);
+    };
+};
