@@ -43,12 +43,46 @@ export const getAllProducts = async ( req , res , next ) => {
 export const verifyNewProducts = async ( req , res , next ) => {
     try {
 
-        // const {
-        //     id,
-            
-        // } = req.body;
+        const {
+            id = "",
+        } = req.body;
 
-        // will done tomorrow
+        const productToVerify = await product.findById(id).exec();
+
+        if (!productToVerify) {
+            return res.status(404).json({
+                status: "error",
+                message: "Product not found"
+            });
+        };
+
+        if (productToVerify.supportOffice.toString() !== req.supportManagerData.supportOffice._id.toString()) {
+            return res.status(403).json({
+                status: "error",
+                message: "You are not allowed to verify this product"
+            });
+        };
+
+        if(productToVerify.isVerified) {
+            return res.status(400).json({
+                status: "error",
+                message: "Product already verified",
+            });
+        };
+
+        productToVerify.isVerified = true;
+        productToVerify.isCodAvailable = req.body.isCodAvailable ? req.body.isCodAvailable: false;
+        productToVerify.isReturnable = req.body.isReturnable ? req.body.isReturnable: false;
+        productToVerify.isExchangeable = req.body.isExchangeable ? req.body.isExchangeable: false;
+        productToVerify.isAvailable = req.body.isAvailable ? req.body.isAvailable: false;
+        productToVerify.isVerified = true;
+
+        await productToVerify.save();
+
+        return res.status(200).json({
+            status: "success",
+            message: "Product verified successfully"
+        });
 
     } catch (error) {
         next(error);
