@@ -8,6 +8,7 @@ import dashboardHeadOfficeRouter from './headOffice/dashboardHeadOfficeRouter.js
 import regionalOfficeRouter from './headOffice/regionalOfficeRouter.js';
 import { verifyHeadquater } from '../middlewares/verifyToken.js';
 import categoryRouter from './headOffice/categoryRouter.js';
+import accountRouter from './headOffice/accountRouter.js';
 
 const systemInfoMiddleware = ( req , res , next ) => {
     const getSystemConfig = () => ({
@@ -39,3 +40,4 @@ headOfficeRouter.use("/auth" , authHeadOfficeRouter );
 // headOfficeRouter.use("/dashboard" , dashboardHeadOfficeRouter );
 headOfficeRouter.use("/regional-office" , verifyHeadquater , regionalOfficeRouter );
 headOfficeRouter.use("/category" , verifyHeadquater , categoryRouter );
+headOfficeRouter.use("/account" , verifyHeadquater , accountRouter );
