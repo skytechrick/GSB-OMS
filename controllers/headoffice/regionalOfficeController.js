@@ -65,7 +65,7 @@ export const getAllRegionalOffices = async ( req , res , next ) => {
         } = req.query;
 
         const allRegionalOffices = await regionalOffice.find({})
-        .select("-__v -address")
+        .select("-__v")
         .limit(parseInt(limit, 10))
         .skip(page > 0 ? ( ( page - 1 ) * limit ) : 0 );
         
