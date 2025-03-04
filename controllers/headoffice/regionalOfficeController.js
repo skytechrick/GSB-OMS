@@ -208,3 +208,32 @@ export const getAllRegionalOfficer = async ( req , res , next ) => {
         next(error);
     };
 };
+
+export const getRegionalOfficeById = async ( req , res , next ) => {
+    try {
+
+        const { id } = req.params;
+
+        const regionalOfficeData = await regionalOffice
+        .findById(id)
+        .populate("regionalOfficers branches")
+        .select("-__v")
+        .exec();
+
+        if(!regionalOfficeData) {
+            return res.status(400).json({
+                status: "error",
+                message: "Regional Office Not Found",
+            });
+        };
+
+        return res.status(200).json({
+            status: "success",
+            message: "Regional Office",
+            data: regionalOfficeData,
+        });
+
+    } catch (error) {
+        next(error);
+    };
+};

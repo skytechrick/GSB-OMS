@@ -68,7 +68,7 @@ const regionalOfficeSchema = new Schema({
     }],
     regionalOfficers:[{
         type: mongoose.Schema.Types.ObjectId,
-        ref: "regional_officers",
+        ref: "regional_officer",
     }],
     branches:[{
         type: mongoose.Schema.Types.ObjectId,
