@@ -15,4 +15,12 @@ const transporter = nodemailer.createTransport({
     connectionTimeout: 6000,
 });
 
+transporter.verify((error) => {
+    if(error) {
+        console.log("Error in transporter: ", error);
+    } else {
+        console.log("No-Reply - Connected to mail server!");
+    };
+});
+
 export default transporter;
